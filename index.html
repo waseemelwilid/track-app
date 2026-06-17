@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0d0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Track" />
+  <title>Track</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+</head>
+<body>
+  <!-- Loading -->
+  <div id="splash" class="splash">
+    <div class="splash-mark">T</div>
+    <div class="splash-spin"></div>
+  </div>
+
+  <!-- Login (only used in cloud/Firebase mode) -->
+  <div id="login" class="login hidden">
+    <div class="login-card">
+      <div class="login-mark">Track</div>
+      <p class="login-sub">Sign in to sync your data</p>
+      <input id="login-email" type="email" placeholder="Email" autocomplete="username" />
+      <input id="login-pass" type="password" placeholder="Password" autocomplete="current-password" />
+      <button id="login-btn" class="btn-primary">Sign in</button>
+      <p id="login-error" class="login-error"></p>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app" class="app hidden">
+    <main id="view" class="view"></main>
+
+    <nav class="tabbar">
+      <button class="tab" data-tab="dashboard" aria-label="Dashboard">
+        <span class="tab-ico">▦</span><span class="tab-lbl">Home</span>
+      </button>
+      <button class="tab" data-tab="checkin" aria-label="Check-in">
+        <span class="tab-ico">＋</span><span class="tab-lbl">Check-in</span>
+      </button>
+      <button class="tab" data-tab="workouts" aria-label="Workouts">
+        <span class="tab-ico">▮</span><span class="tab-lbl">Workouts</span>
+      </button>
+      <button class="tab" data-tab="trends" aria-label="Trends">
+        <span class="tab-ico">📈</span><span class="tab-lbl">Trends</span>
+      </button>
+    </nav>
+  </div>
+
+  <div id="offline" class="offline-banner hidden">Offline — changes save and sync later</div>
+
+  <!-- Watchdog: runs even if ES modules are blocked (e.g. opened as a file://) -->
+  <script>
+    window.addEventListener("error", function (ev) {
+      if (ev && ev.message && /module|import|MIME|Failed to fetch dynamically/i.test(ev.message)) {
+        showStuck(ev.message);
+      }
+    });
+    setTimeout(function () {
+      var splash = document.getElementById("splash");
+      var app = document.getElementById("app");
+      var login = document.getElementById("login");
+      var stillSplash = splash && !splash.classList.contains("hidden");
+      var appHidden = app && app.classList.contains("hidden");
+      var loginHidden = login && login.classList.contains("hidden");
+      if (stillSplash && appHidden && loginHidden) showStuck();
+    }, 7000);
+    function showStuck(detail) {
+      var splash = document.getElementById("splash");
+      if (!splash) return;
+      var fileMode = location.protocol === "file:";
+      splash.innerHTML =
+        '<div style="max-width:340px;text-align:center;padding:24px;font-family:-apple-system,Segoe UI,sans-serif;color:#f2f2f5">' +
+          '<div style="font-size:40px;margin-bottom:12px">⚠️</div>' +
+          '<div style="font-weight:800;font-size:18px;margin-bottom:10px">App didn’t load</div>' +
+          (fileMode
+            ? '<div style="color:#9a9aa6;font-size:14px;line-height:1.55">You opened the file directly. This app must be hosted at a web address to run.<br><br>Drag the folder onto <b>app.netlify.com/drop</b>, then open the link it gives you.</div>'
+            : '<div style="color:#9a9aa6;font-size:14px;line-height:1.55">Something blocked startup. Check your connection and reload. ' + (detail ? '<br><br><span style="font-size:12px">' + detail + '</span>' : '') + '</div>') +
+        '</div>';
+    }
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
